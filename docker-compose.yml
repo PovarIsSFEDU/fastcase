@@ -1,0 +1,39 @@
+version: '3.7'
+services:
+  fastcase:
+    container_name: fastcase
+    build: .
+    restart: always
+    ports:
+      - "3000:8081"
+    depends_on:
+      - fastcase-postgres
+    environment:
+      spring.jpa.hibernate.ddl-auto: ${DDL_AUTO}
+      spring.datasource.username: ${DB_USER}
+      spring.datasource.password: ${DB_PASSWORD}
+      SQL_HOST: ${POSTGRES_HOST}
+
+    entrypoint: [ "java", "-jar", "app.jar" ]
+
+  fastcase-postgres:
+    image: postgres:latest
+    restart: always
+    ports:
+      - "3307:5432"
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${PODVIG_DB}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_HOST: podvig-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_POOL: 10
+
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

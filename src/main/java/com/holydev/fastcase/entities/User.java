@@ -4,6 +4,7 @@ package com.holydev.fastcase.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.holydev.fastcase.entities.service_entities.Comment;
+import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.RegistrationRequest;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -71,8 +72,7 @@ public class User implements Serializable, UserDetails {
     private Set<Task> author_tasks;
 
     //    Список задач, которые выполняет сотрудник
-    @OneToMany(mappedBy = "assignee_id", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @ManyToMany(mappedBy = "assignee_ids", fetch = FetchType.LAZY)
     private Set<Task> user_tasks;
 
     //    Список задач, на которые подписан сотрудник
@@ -90,6 +90,10 @@ public class User implements Serializable, UserDetails {
     @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<Comment> user_comments;
+
+    @OneToMany(mappedBy = "owner", orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Set<TriggerStrategy> triggers;
 
     @Override
     @JsonIgnore
