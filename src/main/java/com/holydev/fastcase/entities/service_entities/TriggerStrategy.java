@@ -6,6 +6,7 @@ import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,6 +32,10 @@ public class TriggerStrategy {
     @ManyToOne
     @JoinColumn(name = "parent_task")
     private Task parent_task;
+
+    @OneToMany(mappedBy = "trigger_strategy", orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Set<Notification> notifications;
 
     @Column
     private String needed_action;

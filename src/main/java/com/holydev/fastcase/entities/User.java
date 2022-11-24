@@ -4,6 +4,7 @@ package com.holydev.fastcase.entities;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.holydev.fastcase.entities.service_entities.Comment;
+import com.holydev.fastcase.entities.service_entities.Notification;
 import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.RegistrationRequest;
 import lombok.*;
@@ -59,6 +60,7 @@ public class User implements Serializable, UserDetails {
     @ManyToMany
     @JsonManagedReference
     @Setter
+    @ToString.Exclude
     private Set<Role> roles = new HashSet<>();
 
     //    Список друзей пользователя
@@ -73,6 +75,7 @@ public class User implements Serializable, UserDetails {
 
     //    Список задач, которые выполняет сотрудник
     @ManyToMany(mappedBy = "assignee_ids", fetch = FetchType.LAZY)
+    @ToString.Exclude
     private Set<Task> user_tasks;
 
     //    Список задач, на которые подписан сотрудник
@@ -94,6 +97,15 @@ public class User implements Serializable, UserDetails {
     @OneToMany(mappedBy = "owner", orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     private Set<TriggerStrategy> triggers;
+
+    @OneToMany(mappedBy = "referrer", orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Set<Notification> reffered_notifications;
+
+
+    @OneToMany(mappedBy = "addressant", orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Set<Notification> incoming_notifications;
 
     @Override
     @JsonIgnore

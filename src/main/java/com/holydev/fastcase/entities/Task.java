@@ -1,6 +1,7 @@
 package com.holydev.fastcase.entities;
 
 import com.holydev.fastcase.entities.service_entities.Comment;
+import com.holydev.fastcase.entities.service_entities.Notification;
 import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import lombok.*;
@@ -52,9 +53,17 @@ public class Task {
     @ToString.Exclude
     private Set<Comment> comments;
 
+    @OneToMany(mappedBy = "referred_task", orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Set<Notification> notifications;
+
     public Task(SimpleTask new_task) {
         this.name = new_task.name();
         this.description = new_task.description();
         this.attachment_path = new_task.media_contents();
+    }
+
+    public void add_assignee(User assignee) {
+        this.assignee_ids.add(assignee);
     }
 }
