@@ -1,7 +1,8 @@
 package com.holydev.fastcase.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.holydev.fastcase.entities.service_entities.Comment;
-import com.holydev.fastcase.entities.service_entities.Notification;
 import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import lombok.*;
@@ -25,12 +26,14 @@ public class Task {
     @Column
     private String name;
 
-    @Lob
+    @Column
     private String description;
 
     @Column
     private String attachment_path;
 
+
+    //     0 - opened, 1 - closed, 2 - completed
     @Column
     private int status;
 
@@ -45,27 +48,28 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
+    @JsonManagedReference
     private User author_id;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<User> assignee_ids;
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "user_tasks")
+    @JsonIgnore
+    private Set<User> assignee_ids = new java.util.LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<User> interesants;
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "subscribed_tasks")
+    @JsonIgnore
+    private Set<User> interesants = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "parent_task", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<TriggerStrategy> triggers;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "target_task", orphanRemoval = true)
+    @JsonIgnore
+    private Set<TriggerStrategy> triggers = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "parent_task", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Comment> comments;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parent_task", orphanRemoval = true)
+    @JsonIgnore
+    private Set<TriggerStrategy> parent_triggers = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "referred_task", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Notification> notifications;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "parent_task", orphanRemoval = true)
+    @JsonIgnore
+    private Set<Comment> comments = new java.util.LinkedHashSet<>();
 
     public Task(SimpleTask new_task) {
         this.name = new_task.name();
@@ -73,6 +77,7 @@ public class Task {
         this.attachment_path = new_task.media_contents();
     }
 
+    @JsonIgnore
     public void add_assignee(User assignee) {
         this.assignee_ids.add(assignee);
     }

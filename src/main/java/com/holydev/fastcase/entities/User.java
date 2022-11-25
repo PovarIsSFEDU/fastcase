@@ -1,6 +1,7 @@
 package com.holydev.fastcase.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.holydev.fastcase.entities.service_entities.Comment;
@@ -14,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -60,60 +60,80 @@ public class User implements Serializable, UserDetails {
     @Column
     private Long points = 0L;
 
+
+    //    0 - only notifications, 1 - email, 2 - phone_sms
     @Column
-    private int preffered_communication;
+    private int preferred_communication;
 
 
     //    Список ролей-должностей пользователя (начальник, техник, работник)
-    @ManyToMany
-    @JsonManagedReference
-    @Setter
-    @ToString.Exclude
-    private Set<Role> roles = new HashSet<>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "users_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roles_id", referencedColumnName = "id"))
+    private Set<Role> roles = new java.util.LinkedHashSet<>();
 
     //    Список друзей пользователя
-    @OneToMany(mappedBy = "id")
-    @ToString.Exclude
-    private Set<User> friendlist;
+    @JoinTable(name = "friendlists", joinColumns = {
+            @JoinColumn(name = "parent", referencedColumnName = "id", nullable = false)}, inverseJoinColumns = {
+            @JoinColumn(name = "in_list", referencedColumnName = "id", nullable = false)})
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private Set<User> my_friendlist = new java.util.LinkedHashSet<>();
+
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "my_friendlist")
+    @JsonBackReference
+    private Set<User> in_friendlist_of = new java.util.LinkedHashSet<>();
 
     //    Список задач, созданных пользователем
-    @OneToMany(mappedBy = "author_id", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Task> author_tasks;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "author_id", orphanRemoval = true)
+    @JsonIgnore
+    @JsonBackReference
+    private Set<Task> author_tasks = new java.util.LinkedHashSet<>();
 
     //    Список задач, которые выполняет сотрудник
-    @ManyToMany(mappedBy = "assignee_ids", fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Task> user_tasks;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_user_tasks",
+            joinColumns = @JoinColumn(name = "assignee_ids_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "user_tasks_id", referencedColumnName = "id"))
+    @JsonIgnore
+    private Set<Task> user_tasks = new java.util.LinkedHashSet<>();
 
     //    Список задач, на которые подписан сотрудник
-    @ManyToMany(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Task> subscribed_tasks;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_subscribed_tasks",
+            joinColumns = @JoinColumn(name = "interesants_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "subscribed_tasks_id", referencedColumnName = "id"))
+    @JsonIgnore
+    private Set<Task> subscribed_tasks = new java.util.LinkedHashSet<>();
 
     //    Список отделов, в которых работает сотрудник
-    @ManyToMany(fetch = FetchType.LAZY)
-    @ToString.Exclude
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_structures_list",
+            joinColumns = @JoinColumn(name = "employees_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "structures_list_id", referencedColumnName = "id"))
     @JsonManagedReference
-    private Set<Structure> structures_list;
+    private Set<Structure> structures_list = new java.util.LinkedHashSet<>();
 
     //    Список комментариев пользователя
-    @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Comment> user_comments;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "author", orphanRemoval = true)
+    @JsonIgnore
+    private Set<Comment> user_comments = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "owner", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<TriggerStrategy> triggers;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "adressant", orphanRemoval = true)
+    @JsonIgnore
+    private Set<TriggerStrategy> triggers = new java.util.LinkedHashSet<>();
 
-    @OneToMany(mappedBy = "referrer", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Notification> reffered_notifications;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "referrer", orphanRemoval = true)
+    @JsonIgnore
+    private Set<Notification> reffered_notifications = new java.util.LinkedHashSet<>();
 
 
-    @OneToMany(mappedBy = "addressant", orphanRemoval = true, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<Notification> incoming_notifications;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "addressant", orphanRemoval = true)
+    @JsonIgnore
+    private Set<Notification> incoming_notifications = new java.util.LinkedHashSet<>();
 
     @Override
     @JsonIgnore
@@ -156,16 +176,25 @@ public class User implements Serializable, UserDetails {
         return (this.fio == null || this.fio.isBlank() || this.fio.isEmpty()) ? this.username : this.fio;
     }
 
+    @JsonIgnore
     public void addPoints(Long points) {
         this.points += points;
     }
 
-
+    @JsonIgnore
     public User(RegistrationRequest reg_req) {
         this.fio = reg_req.fio();
         this.email = reg_req.email();
         this.username = reg_req.username();
         this.password = reg_req.password();
         this.phone = reg_req.phone();
+    }
+
+    public void addFriend(User friend) {
+        this.my_friendlist.add(friend);
+    }
+
+    public void becomeFriend(User principal) {
+        this.in_friendlist_of.add(principal);
     }
 }

@@ -1,5 +1,8 @@
 package com.holydev.fastcase.entities.service_entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.holydev.fastcase.entities.Task;
 import com.holydev.fastcase.entities.User;
 import lombok.*;

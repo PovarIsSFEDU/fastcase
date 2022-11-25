@@ -7,6 +7,7 @@ import com.holydev.fastcase.entities.User;
 import com.holydev.fastcase.services.interfaces.StorageService;
 import com.holydev.fastcase.services.realisation.TaskService;
 import com.holydev.fastcase.services.realisation.UserService;
+import com.holydev.fastcase.utilities.primitives.SearchRequest;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.security.RolesAllowed;
+import java.util.ArrayList;
 import java.util.List;
 
 @Tag(name = "API methods for users")
@@ -133,11 +135,9 @@ public class OpenApiController {
     }
 
     @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
-    @GetMapping("/tasks/search")
-    public ResponseEntity<List<Task>> search_tasks() {
-        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        User author = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
-        return ResponseEntity.ok(taskService.getOpenTasksForUser(author));
+    @PostMapping("/tasks/search")
+    public ResponseEntity<List<Task>> search_tasks(@RequestBody SearchRequest search_req) {
+        return ResponseEntity.ok(taskService.searchTasks(search_req));
     }
 
     @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
@@ -148,9 +148,20 @@ public class OpenApiController {
     }
 
     @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
-    @GetMapping("/user/{id}/friendlist")
-    public ResponseEntity<User> get_friendlist(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getFriendListById(id));
+    @GetMapping("/friendlist")
+    public ResponseEntity<List<User>> get_friendlist() {
+        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        User principal = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
+        return ResponseEntity.ok(new ArrayList<>(principal.getMy_friendlist()));
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/friendlist/add/{friend_id}")
+    public ResponseEntity<String> add_to_friendlist(@PathVariable Long friend_id) {
+        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        User principal = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
+        userService.addToFriendList(principal, friend_id);
+        return ResponseEntity.ok("Success");
     }
 
     @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})

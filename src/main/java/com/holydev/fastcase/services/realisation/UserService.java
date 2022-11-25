@@ -1,5 +1,6 @@
 package com.holydev.fastcase.services.realisation;
 
+import com.holydev.fastcase.entities.Role;
 import com.holydev.fastcase.entities.User;
 import com.holydev.fastcase.repos.UserRepo;
 import com.holydev.fastcase.utilities.primitives.RegistrationRequest;
@@ -12,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -32,7 +31,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserById(Long user_id) {
-        return userRepo.findFriendlistById(user_id).orElseThrow();
+        return userRepo.findById(user_id).orElseThrow();
     }
 
     public User findAllInfoByUsername(String username) {
@@ -58,12 +57,25 @@ public class UserService implements UserDetailsService {
     public void createDefault() {
         var coded = new BCryptPasswordEncoder().encode("admin");
         var reg_req = new RegistrationRequest("admin", coded, "Лукаш Павел Андреевич", "1789191@sfedu.ru", "+790498716574");
+        var reg_req2 = new RegistrationRequest("admin2", coded, "Акинтьева Полина", "1789q191@sfedu.ru", "+798498796574");
+        var reg_req3 = new RegistrationRequest("admin3", coded, "Соколова-Могила Дарья", "1789q191@sfedu.ru", "+798498786574");
         var admin = new User(reg_req);
-        admin.setRoles(Collections.singleton(roleService.getRoleByName("BOSS")));
+        var admin2 = new User(reg_req2);
+        var admin3 = new User(reg_req3);
+        admin.setRoles(Collections.singleton(roleService.getRoleByName(Role.BOSS)));
+        admin2.setRoles(Collections.singleton(roleService.getRoleByName(Role.TECHNICIAN)));
+        admin3.setRoles(Collections.singleton(roleService.getRoleByName(Role.USER)));
         save(admin);
+        save(admin2);
+        save(admin3);
     }
 
-    public User getFriendListById(Long id) {
-        return userRepo.findFriendlistById(id).orElseThrow();
+    //    TODO send WebSocket notification
+    public void addToFriendList(User principal, Long friend_id) {
+        var friend = getUserById(friend_id);
+        principal.addFriend(friend);
+        friend.becomeFriend(principal);
+        save(principal);
+        save(friend);
     }
 }

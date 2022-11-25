@@ -1,7 +1,9 @@
 package com.holydev.fastcase.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -27,10 +29,8 @@ public class Role implements GrantedAuthority {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @ManyToMany
-    @JsonManagedReference
-    @ToString.Exclude
-    private Set<User> users;
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "roles")
+    private Set<User> users = new java.util.LinkedHashSet<>();
 
     public Role(Long id, String name) {
         this.id = id;

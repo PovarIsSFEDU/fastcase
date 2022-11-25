@@ -3,18 +3,19 @@ package com.holydev.fastcase.services.realisation;
 import com.holydev.fastcase.entities.Role;
 import com.holydev.fastcase.entities.Task;
 import com.holydev.fastcase.entities.User;
-import com.holydev.fastcase.entities.service_entities.Notification;
 import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.repos.TaskRepo;
 import com.holydev.fastcase.services.interfaces.TaskServiceInterface;
-import com.holydev.fastcase.utilities.customs.CustomNotificationStatus;
-import com.holydev.fastcase.utilities.customs.CustomNotificationType;
+import com.holydev.fastcase.utilities.primitives.SearchRequest;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,10 +70,8 @@ public class TaskService implements TaskServiceInterface {
     @Override
     public void addTrigger(SimpleTrigger s_trigger, User author) {
         var trigger = new TriggerStrategy(s_trigger);
-        trigger.setOwner(author);
-        if (s_trigger.parent_task_id() != null) {
-            trigger.setParent_task(getTaskById(s_trigger.parent_task_id()).orElseThrow());
-        }
+        trigger.setAdressant(author);
+//        TODO Создать нотификацию
         var trigger_strat = triggerService.save(trigger);
     }
 
@@ -98,10 +97,8 @@ public class TaskService implements TaskServiceInterface {
             var trigger_strats = new ArrayList<TriggerStrategy>();
             for (var s_trigger : triggers) {
                 var trigger = new TriggerStrategy(s_trigger);
-                trigger.setOwner(userService.getUserById(s_trigger.author_id()));
-                if (s_trigger.parent_task_id() != null) {
-                    trigger.setParent_task(getTaskById(s_trigger.parent_task_id()).orElseThrow());
-                }
+                trigger.setAdressant(userService.getUserById(s_trigger.author_id()));
+//                TODO создать нотификацию
                 var trigger_strat = triggerService.save(trigger);
                 trigger_strats.add(trigger_strat);
             }
@@ -121,7 +118,8 @@ public class TaskService implements TaskServiceInterface {
                 if (canAssign(author, assignee)) {
                     task.add_assignee(assignee);
                 } else {
-                    sendNotification(author, assignee, task_id, CustomNotificationType.INVITATION);
+//                    sendNotification(author, assignee, task_id, CustomNotificationContentSample.TASK_INVITATION);
+                    System.out.println("NIY!");
                 }
             }
             return true;
@@ -130,14 +128,14 @@ public class TaskService implements TaskServiceInterface {
         }
     }
 
-    private void sendNotification(User author, User assignee, Long task_id, String body) {
-        var new_notification = new Notification(author, assignee, body, this.getTaskById(task_id).orElseThrow(), CustomNotificationStatus.PREPARED);
-        notificationService.send(new_notification);
-    }
 
     private boolean canAssign(User author, User assignee) {
         Role author_role = (Role) (author.getAuthorities()).iterator().next();
         Role assignee_role = (Role) (assignee.getAuthorities()).iterator().next();
         return author_role.getId() <= assignee_role.getId();
+    }
+
+    public List<Task> searchTasks(SearchRequest search_req) {
+        return taskRepo.findAllByStr(search_req.search_value());
     }
 }

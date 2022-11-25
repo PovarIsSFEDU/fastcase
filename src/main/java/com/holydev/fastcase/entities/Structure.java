@@ -1,6 +1,7 @@
 package com.holydev.fastcase.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -22,7 +23,7 @@ public class Structure {
     private String name;
 
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private Set<User> employees;
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "structures_list")
+    @JsonBackReference
+    private Set<User> employees = new java.util.LinkedHashSet<>();
 }
