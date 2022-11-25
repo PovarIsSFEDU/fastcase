@@ -7,6 +7,7 @@ import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -32,6 +33,15 @@ public class Task {
 
     @Column
     private int status;
+
+    @Column
+    private int points;
+
+    @Column
+    private String est_time;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created_at;
 
     @ManyToOne
     @JoinColumn(name = "author_id")

@@ -67,8 +67,18 @@ public class TaskService implements TaskServiceInterface {
     }
 
     @Override
-    public void addTrigger(Long task_id, TriggerStrategy trigger) {
+    public void addTrigger(SimpleTrigger s_trigger, User author) {
+        var trigger = new TriggerStrategy(s_trigger);
+        trigger.setOwner(author);
+        if (s_trigger.parent_task_id() != null) {
+            trigger.setParent_task(getTaskById(s_trigger.parent_task_id()).orElseThrow());
+        }
+        var trigger_strat = triggerService.save(trigger);
+    }
 
+    @Override
+    public List<Task> getOpenTasksForUser(User author) {
+        return taskRepo.findByStatus(author.getId());
     }
 
     @Override

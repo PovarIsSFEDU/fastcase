@@ -40,7 +40,7 @@ public class TriggerStrategy {
     @Column
     private String needed_action;
 
-    //
+    //1h/1d/1w
     private String timer;
 
 

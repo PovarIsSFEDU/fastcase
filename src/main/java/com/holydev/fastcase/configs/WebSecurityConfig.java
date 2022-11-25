@@ -87,6 +87,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/public/**").permitAll()
                 // Our private endpoints
                 .anyRequest().authenticated()
+                .and().logout().invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .logoutSuccessUrl("/login")
+                .deleteCookies("JSESSIONID")
                 // Set up oauth2 resource server
                 .and().httpBasic(Customizer.withDefaults())
                 .oauth2ResourceServer()

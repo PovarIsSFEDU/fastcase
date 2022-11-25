@@ -7,10 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -29,7 +32,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User getUserById(Long user_id) {
-        return userRepo.findById(user_id).orElseThrow();
+        return userRepo.findFriendlistById(user_id).orElseThrow();
     }
 
     public User findAllInfoByUsername(String username) {
@@ -53,9 +56,14 @@ public class UserService implements UserDetailsService {
     }
 
     public void createDefault() {
-        var reg_req = new RegistrationRequest("admin", "admin", "Лукаш Павел Андреевич", "plukash@sfedu.ru", "+79281912174");
+        var coded = new BCryptPasswordEncoder().encode("admin");
+        var reg_req = new RegistrationRequest("admin", coded, "Лукаш Павел Андреевич", "1789191@sfedu.ru", "+790498716574");
         var admin = new User(reg_req);
         admin.setRoles(Collections.singleton(roleService.getRoleByName("BOSS")));
         save(admin);
+    }
+
+    public User getFriendListById(Long id) {
+        return userRepo.findFriendlistById(id).orElseThrow();
     }
 }

@@ -56,6 +56,14 @@ public class User implements Serializable, UserDetails {
     @Setter(value = AccessLevel.NONE)
     private String phone;
 
+
+    @Column
+    private Long points = 0L;
+
+    @Column
+    private int preffered_communication;
+
+
     //    Список ролей-должностей пользователя (начальник, техник, работник)
     @ManyToMany
     @JsonManagedReference
@@ -146,6 +154,10 @@ public class User implements Serializable, UserDetails {
 
     public String getFio() {
         return (this.fio == null || this.fio.isBlank() || this.fio.isEmpty()) ? this.username : this.fio;
+    }
+
+    public void addPoints(Long points) {
+        this.points += points;
     }
 
 

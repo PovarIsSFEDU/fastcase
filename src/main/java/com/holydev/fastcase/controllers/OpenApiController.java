@@ -2,11 +2,13 @@ package com.holydev.fastcase.controllers;
 
 
 import com.holydev.fastcase.entities.Role;
+import com.holydev.fastcase.entities.Task;
 import com.holydev.fastcase.entities.User;
 import com.holydev.fastcase.services.interfaces.StorageService;
 import com.holydev.fastcase.services.realisation.TaskService;
 import com.holydev.fastcase.services.realisation.UserService;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
+import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -112,5 +114,74 @@ public class OpenApiController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/add/trigger_strategy")
+    public ResponseEntity<String> add_trigger(@RequestBody SimpleTrigger s_trigger) {
+        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        User author = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
+        taskService.addTrigger(s_trigger, author);
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @GetMapping("/tasks")
+    public ResponseEntity<List<Task>> get_tasks() {
+        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        User author = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
+        return ResponseEntity.ok(taskService.getOpenTasksForUser(author));
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @GetMapping("/tasks/search")
+    public ResponseEntity<List<Task>> search_tasks() {
+        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+        User author = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
+        return ResponseEntity.ok(taskService.getOpenTasksForUser(author));
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @GetMapping("/task/{id}")
+    public ResponseEntity<Task> get_task(@PathVariable Long id) {
+        var task = taskService.getTaskById(id);
+        return task.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(404).body(null));
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @GetMapping("/user/{id}/friendlist")
+    public ResponseEntity<User> get_friendlist(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getFriendListById(id));
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/task/open")
+    public ResponseEntity<String> open_task() {
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/task/close")
+    public ResponseEntity<String> close_task() {
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/task/complete")
+    public ResponseEntity<String> complete_task() {
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/task/comment")
+    public ResponseEntity<String> comment_task() {
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
+    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
+    @PostMapping("/check")
+    public ResponseEntity<String> check_notifications() {
+        return ResponseEntity.ok("Not implemented yet!");
+    }
+
 
 }

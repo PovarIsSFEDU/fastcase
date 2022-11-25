@@ -6,6 +6,7 @@ import com.holydev.fastcase.repos.NotificationsRepo;
 import com.holydev.fastcase.services.interfaces.NotificationServiceInterface;
 import com.holydev.fastcase.utilities.customs.CustomNotificationStatus;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,4 +23,9 @@ public class NotificationService implements NotificationServiceInterface {
         notification.setStatus(CustomNotificationStatus.SENDED);
         notificationsRepo.save(notification);
     }
+
+//    @Scheduled(fixedRate = 20000)
+//    public void update_timing() {
+//
+//    }
 }

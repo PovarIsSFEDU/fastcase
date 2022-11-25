@@ -2,7 +2,6 @@ package com.holydev.fastcase.services.interfaces;
 
 import com.holydev.fastcase.entities.Task;
 import com.holydev.fastcase.entities.User;
-import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
 import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 
@@ -26,5 +25,7 @@ public interface TaskServiceInterface {
 
     void deleteTask(Long task_id);
 
-    void addTrigger(Long task_id, TriggerStrategy trigger);
+    void addTrigger(SimpleTrigger s_trigger, User author);
+
+    List<Task> getOpenTasksForUser(User author);
 }
