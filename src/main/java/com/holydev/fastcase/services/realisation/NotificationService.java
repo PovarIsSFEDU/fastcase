@@ -5,7 +5,10 @@ import com.holydev.fastcase.entities.service_entities.Notification;
 import com.holydev.fastcase.repos.NotificationsRepo;
 import com.holydev.fastcase.services.interfaces.NotificationServiceInterface;
 import com.holydev.fastcase.utilities.customs.CustomNotificationType;
+import com.holydev.fastcase.utilities.primitives.SimpleNotification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -31,9 +34,13 @@ public class NotificationService implements NotificationServiceInterface {
         return notificationsRepo.saveAndFlush(notification);
     }
 
-    @Scheduled(fixedRate = 20000)
+    @Scheduled(fixedRate = 5000)
     public void sendNotification() {
-        var all_open = notificationsRepo.findByStatus(0);
+        var msg = new SimpleNotification("First try!");
+
+        simpMessagingTemplate.convertAndSendToUser("admin", "/direct_trigger", msg);
+        System.out.println("sended");
+        /*var all_open = notificationsRepo.findByStatus(0);
         for (var n : all_open) {
             if (n.getType().equalsIgnoreCase(CustomNotificationType.BY_TIMER)) {
                 var neg = Duration.between(Instant.now(), n.getCreated_at().toInstant()).toHours();
@@ -77,6 +84,6 @@ public class NotificationService implements NotificationServiceInterface {
                     save(n);
                 }
             }
-        }
+        }*/
     }
 }

@@ -75,6 +75,7 @@ public class Task {
         this.name = new_task.name();
         this.description = new_task.description();
         this.attachment_path = new_task.media_contents();
+        this.points = new_task.points();
     }
 
     @JsonIgnore

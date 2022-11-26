@@ -15,13 +15,13 @@ import java.io.Serializable;
 @ToString
 public class SimpleUser implements Serializable {
     private Long id;
-    private String email;
+    private String username;
     private String fio;
     private String jwt;
 
     public SimpleUser(User user, String jwt) {
         this.id = user.getId();
-        this.email = user.getUsername();
+        this.username = user.getUsername();
         this.jwt = jwt;
         this.fio = user.getFio();
     }
