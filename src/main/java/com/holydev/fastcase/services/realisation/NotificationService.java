@@ -7,8 +7,6 @@ import com.holydev.fastcase.services.interfaces.NotificationServiceInterface;
 import com.holydev.fastcase.utilities.customs.CustomNotificationType;
 import com.holydev.fastcase.utilities.primitives.SimpleNotification;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -36,54 +34,52 @@ public class NotificationService implements NotificationServiceInterface {
 
     @Scheduled(fixedRate = 5000)
     public void sendNotification() {
-        var msg = new SimpleNotification("First try!");
-
-        simpMessagingTemplate.convertAndSendToUser("admin", "/direct_trigger", msg);
-        System.out.println("sended");
-        /*var all_open = notificationsRepo.findByStatus(0);
+        var all_open = notificationsRepo.findByStatus(0);
         for (var n : all_open) {
+            var s_notif = new SimpleNotification(n.getType(), n.getContent());
             if (n.getType().equalsIgnoreCase(CustomNotificationType.BY_TIMER)) {
                 var neg = Duration.between(Instant.now(), n.getCreated_at().toInstant()).toHours();
 
                 switch (n.getTrigger_strategy().getTimer()) {
                     case "1h": {
                         if (neg == n.getTries() + 1) {
-                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                         }
                     }
                     case "1d": {
                         if ((int) (neg / 24) == n.getTries() + 1) {
-                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                         }
                     }
                     case "1w": {
                         if ((int) (neg / (24 * 7)) == n.getTries() + 1) {
-                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+                            simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                         }
                     }
                 }
             } else if (n.getType().equalsIgnoreCase(CustomNotificationType.TASK_OPENED)) {
                 if (n.getTries() == 0 && n.getTrigger_strategy().getTarget_task().getStatus() == 0) {
-                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                     n.setTries(1);
                     n.setStatus(1);
                     save(n);
                 }
             } else if (n.getType().equalsIgnoreCase(CustomNotificationType.TASK_CLOSED)) {
                 if (n.getTries() == 0 && n.getTrigger_strategy().getTarget_task().getStatus() == 1) {
-                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                     n.setTries(1);
                     n.setStatus(1);
                     save(n);
                 }
             } else if (n.getType().equalsIgnoreCase(CustomNotificationType.TASK_COMPLETED)) {
                 if (n.getTries() == 0 && n.getTrigger_strategy().getTarget_task().getStatus() == 2) {
-                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", n.getContent());
+
+                    simpMessagingTemplate.convertAndSendToUser(n.getAddressant().getUsername(), "/direct_trigger", s_notif);
                     n.setTries(1);
                     n.setStatus(1);
                     save(n);
                 }
             }
-        }*/
+        }
     }
 }

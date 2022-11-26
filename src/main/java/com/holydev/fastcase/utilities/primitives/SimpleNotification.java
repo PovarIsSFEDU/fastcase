@@ -11,5 +11,6 @@ import java.io.Serializable;
 @Setter
 @ToString
 public class SimpleNotification {
+    String type;
     String content;
 }
