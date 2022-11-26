@@ -12,10 +12,7 @@ import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +33,7 @@ public class TaskService implements TaskServiceInterface {
     }
 
     @Override
-    public void createTask(Task new_task) {
+    public void save(Task new_task) {
         taskRepo.save(new_task);
     }
 
@@ -71,7 +68,6 @@ public class TaskService implements TaskServiceInterface {
     public void addTrigger(SimpleTrigger s_trigger, User author) {
         var trigger = new TriggerStrategy(s_trigger);
         trigger.setAdressant(author);
-//        TODO Создать нотификацию
         var trigger_strat = triggerService.save(trigger);
     }
 
@@ -87,6 +83,7 @@ public class TaskService implements TaskServiceInterface {
 
             task.setAuthor_id(author);
             task.setStatus(1);
+            task.setCreated_at(new Date());
 
             var assignees = assigned_users_id.stream().map(userService::getUserById).collect(Collectors.toSet());
             task.setAssignee_ids(assignees);
@@ -94,17 +91,23 @@ public class TaskService implements TaskServiceInterface {
             var interesants = subscribed_users_id.stream().map(userService::getUserById).collect(Collectors.toSet());
             task.setInteresants(interesants);
 
+            var flushed = createAndFlushTask(task);
+
             var trigger_strats = new ArrayList<TriggerStrategy>();
             for (var s_trigger : triggers) {
                 var trigger = new TriggerStrategy(s_trigger);
                 trigger.setAdressant(userService.getUserById(s_trigger.author_id()));
-//                TODO создать нотификацию
+                if (!s_trigger.trigger_type().equalsIgnoreCase("by_timer")) {
+                    trigger.setTarget_task(getTaskById(s_trigger.target_task_id()).orElseThrow());
+                }
+                trigger.setParent_task(flushed);
                 var trigger_strat = triggerService.save(trigger);
                 trigger_strats.add(trigger_strat);
             }
-            task.setTriggers(new HashSet<>(trigger_strats));
+            flushed.setTriggers(new HashSet<>(trigger_strats));
+            save(flushed);
 
-            return Optional.of(createAndFlushTask(task));
+            return Optional.of(flushed);
         } catch (Exception e) {
             return Optional.empty();
         }

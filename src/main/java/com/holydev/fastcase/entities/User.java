@@ -21,7 +21,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "users")
 public class User implements Serializable, UserDetails {
@@ -89,8 +88,7 @@ public class User implements Serializable, UserDetails {
 
     //    Список задач, созданных пользователем
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "author_id", orphanRemoval = true)
-    @JsonIgnore
-    @JsonBackReference
+    @JsonManagedReference
     private Set<Task> author_tasks = new java.util.LinkedHashSet<>();
 
     //    Список задач, которые выполняет сотрудник
@@ -107,6 +105,7 @@ public class User implements Serializable, UserDetails {
             joinColumns = @JoinColumn(name = "interesants_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "subscribed_tasks_id", referencedColumnName = "id"))
     @JsonIgnore
+    @JsonBackReference
     private Set<Task> subscribed_tasks = new java.util.LinkedHashSet<>();
 
     //    Список отделов, в которых работает сотрудник

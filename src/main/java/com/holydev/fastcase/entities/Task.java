@@ -1,11 +1,14 @@
 package com.holydev.fastcase.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.holydev.fastcase.entities.service_entities.Comment;
 import com.holydev.fastcase.entities.service_entities.TriggerStrategy;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,7 +18,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "tasks")
 public class Task {
@@ -48,7 +50,7 @@ public class Task {
 
     @ManyToOne
     @JoinColumn(name = "author_id")
-    @JsonManagedReference
+    @JsonBackReference
     private User author_id;
 
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "user_tasks")
@@ -71,6 +73,7 @@ public class Task {
     @JsonIgnore
     private Set<Comment> comments = new java.util.LinkedHashSet<>();
 
+    @JsonIgnore
     public Task(SimpleTask new_task) {
         this.name = new_task.name();
         this.description = new_task.description();

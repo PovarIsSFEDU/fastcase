@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface TaskServiceInterface {
     Optional<Task> getTaskById(Long id);
 
-    void createTask(Task new_task);
+    void save(Task new_task);
 
     Optional<Task> createTask(SimpleTask new_task, User author, List<Long> assigned_users_id, List<Long> subscribed_users_id, List<SimpleTrigger> triggers);
 

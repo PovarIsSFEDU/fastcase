@@ -47,9 +47,6 @@ public class TriggerStrategy {
     private List<Notification> notifications;
 
 
-    //    Task_opened, task_closed, task_completed
-    @Column
-    private String needed_action;
 
     //1h/1d/1w
     private String timer;
@@ -57,7 +54,6 @@ public class TriggerStrategy {
 
     public TriggerStrategy(SimpleTrigger s_trigger) {
         this.triggerType = s_trigger.trigger_type();
-        this.needed_action = s_trigger.needed_action();
         this.timer = s_trigger.timer();
     }
 

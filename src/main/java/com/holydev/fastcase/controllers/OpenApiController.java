@@ -9,7 +9,6 @@ import com.holydev.fastcase.services.realisation.TaskService;
 import com.holydev.fastcase.services.realisation.UserService;
 import com.holydev.fastcase.utilities.primitives.SearchRequest;
 import com.holydev.fastcase.utilities.primitives.SimpleTask;
-import com.holydev.fastcase.utilities.primitives.SimpleTrigger;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -115,15 +114,6 @@ public class OpenApiController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-    }
-
-    @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
-    @PostMapping("/add/trigger_strategy")
-    public ResponseEntity<String> add_trigger(@RequestBody SimpleTrigger s_trigger) {
-        var a = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-        User author = userService.getUserById(Long.parseLong(a.getName().split(",")[0]));
-        taskService.addTrigger(s_trigger, author);
-        return ResponseEntity.ok("Not implemented yet!");
     }
 
     @RolesAllowed({Role.BOSS, Role.TECHNICIAN, Role.USER})
